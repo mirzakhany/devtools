@@ -260,11 +260,20 @@
                 const hours = Math.floor(minutes / 60);
                 const days = Math.floor(hours / 24);
                 
-                // Calculate months and years
-                const monthDiff = (now.getFullYear() - selectedDate.getFullYear()) * 12 + 
-                                  (now.getMonth() - selectedDate.getMonth());
-                const years = Math.floor(monthDiff / 12);
-                const months = monthDiff % 12;
+                // Calculate months and years more accurately
+                let years = now.getFullYear() - selectedDate.getFullYear();
+                let months = now.getMonth() - selectedDate.getMonth();
+                
+                // Adjust for day of month
+                if (now.getDate() < selectedDate.getDate()) {
+                    months--;
+                }
+                
+                // Handle negative months
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
                 
                 // Calculate remaining time
                 const remainingHours = hours % 24;
