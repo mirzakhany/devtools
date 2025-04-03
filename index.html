@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Utility Tools</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .tool-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        textarea, input[type="text"], input[type="number"], input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .output {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom-color: white;
+            margin-bottom: -1px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Developer Utility Tools</h1>
+    
+    <div class="tabs">
+        <div class="tab active" data-tool="timestamp">Timestamp Converter</div>
+        <div class="tab" data-tool="time-since">Time Since Calculator</div>
+        <div class="tab" data-tool="jwt">JWT Decoder</div>
+        <div class="tab" data-tool="base64">Base64 Encoder/Decoder</div>
+    </div>
+    
+    <!-- Timestamp Converter -->
+    <div class="tool-container" id="timestamp-tool">
+        <h2>Timestamp Converter</h2>
+        <div>
+            <label for="timestamp-input">Unix Timestamp (in seconds):</label>
+            <input type="number" id="timestamp-input" placeholder="Enter timestamp (e.g., 1617235200)">
+            <button id="convert-timestamp">Convert</button>
+            <button id="current-timestamp">Use Current Time</button>
+        </div>
+        <div class="output" id="timestamp-output"></div>
+    </div>
+    
+    <!-- Time Since Calculator -->
+    <div class="tool-container" id="time-since-tool" style="display: none;">
+        <h2>Time Since Calculator</h2>
+        <div>
+            <label for="time-since-input">Select a Date and Time:</label>
+            <input type="datetime-local" id="time-since-input">
+            <button id="calculate-time-since">Calculate</button>
+        </div>
+        <div class="output" id="time-since-output"></div>
+    </div>
+    
+    <!-- JWT Decoder -->
+    <div class="tool-container" id="jwt-tool" style="display: none;">
+        <h2>JWT Decoder</h2>
+        <div>
+            <label for="jwt-input">JWT Token:</label>
+            <textarea id="jwt-input" placeholder="Enter JWT token..."></textarea>
+            <button id="decode-jwt">Decode</button>
+        </div>
+        <div class="output" id="jwt-header-output">
+            <strong>Header:</strong>
+            <div id="jwt-header-content"></div>
+        </div>
+        <div class="output" id="jwt-payload-output">
+            <strong>Payload:</strong>
+            <div id="jwt-payload-content"></div>
+        </div>
+        <div class="error" id="jwt-error" style="display: none;"></div>
+    </div>
+    
+    <!-- Base64 Encoder/Decoder -->
+    <div class="tool-container" id="base64-tool" style="display: none;">
+        <h2>Base64 Encoder/Decoder</h2>
+        <div>
+            <label for="base64-input">Input:</label>
+            <textarea id="base64-input" placeholder="Enter text to encode or base64 to decode..."></textarea>
+            <button id="encode-base64">Encode</button>
+            <button id="decode-base64">Decode</button>
+        </div>
+        <div class="output" id="base64-output"></div>
+        <div class="error" id="base64-error" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Hide all tool containers
+                document.querySelectorAll('.tool-container').forEach(container => {
+                    container.style.display = 'none';
+                });
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Show the selected tool container and activate the tab
+                const toolName = tab.getAttribute('data-tool');
+                document.getElementById(`${toolName}-tool`).style.display = 'block';
+                tab.classList.add('active');
+            });
+        });
+        
+        // Timestamp Converter
+        document.getElementById('convert-timestamp').addEventListener('click', () => {
+            const timestamp = document.getElementById('timestamp-input').value;
+            const output = document.getElementById('timestamp-output');
+            
+            if (!timestamp) {
+                output.textContent = 'Please enter a timestamp.';
+                return;
+            }
+            
+            try {
+                const date = new Date(parseInt(timestamp) * 1000);
+                if (isNaN(date.getTime())) {
+                    throw new Error('Invalid timestamp');
+                }
+                
+                output.innerHTML = `
+                    <strong>UTC:</strong> ${date.toUTCString()}
+                    <br><strong>Local:</strong> ${date.toString()}
+                    <br><strong>ISO:</strong> ${date.toISOString()}
+                `;
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        });
+        
+        document.getElementById('current-timestamp').addEventListener('click', () => {
+            const now = Math.floor(Date.now() / 1000);
+            document.getElementById('timestamp-input').value = now;
+            document.getElementById('convert-timestamp').click();
+        });
+        
+        // Time Since Calculator
+        document.getElementById('calculate-time-since').addEventListener('click', () => {
+            const inputDate = document.getElementById('time-since-input').value;
+            const output = document.getElementById('time-since-output');
+            
+            if (!inputDate) {
+                output.textContent = 'Please select a date and time.';
+                return;
+            }
+            
+            try {
+                const selectedDate = new Date(inputDate);
+                const now = new Date();
+                
+                const diffMs = now - selectedDate;
+                
+                if (diffMs < 0) {
+                    output.textContent = 'The selected date is in the future.';
+                    return;
+                }
+                
+                // Calculate differences
+                const seconds = Math.floor(diffMs / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                
+                // Calculate months and years
+                const monthDiff = (now.getFullYear() - selectedDate.getFullYear()) * 12 + 
+                                  (now.getMonth() - selectedDate.getMonth());
+                const years = Math.floor(monthDiff / 12);
+                const months = monthDiff % 12;
+                
+                // Calculate remaining time
+                const remainingHours = hours % 24;
+                const remainingMinutes = minutes % 60;
+                const remainingSeconds = seconds % 60;
+                
+                output.innerHTML = `
+                    <strong>Time elapsed:</strong><br>
+                    ${years} years, ${months} months, ${days % 30} days<br>
+                    ${days} total days<br>
+                    ${hours} total hours<br>
+                    ${minutes} total minutes<br>
+                    ${seconds} total seconds<br><br>
+                    <strong>Precise time:</strong><br>
+                    ${years} years, ${months} months, ${days % 30} days, ${remainingHours} hours, ${remainingMinutes} minutes, ${remainingSeconds} seconds
+                `;
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        });
+        
+        // JWT Decoder
+        document.getElementById('decode-jwt').addEventListener('click', () => {
+            const jwtToken = document.getElementById('jwt-input').value.trim();
+            const headerOutput = document.getElementById('jwt-header-content');
+            const payloadOutput = document.getElementById('jwt-payload-content');
+            const errorOutput = document.getElementById('jwt-error');
+            
+            // Reset outputs
+            headerOutput.textContent = '';
+            payloadOutput.textContent = '';
+            errorOutput.style.display = 'none';
+            
+            if (!jwtToken) {
+                errorOutput.textContent = 'Please enter a JWT token.';
+                errorOutput.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const parts = jwtToken.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid JWT format. Expected 3 parts separated by dots.');
+                }
+                
+                const headerB64 = parts[0];
+                const payloadB64 = parts[1];
+                
+                const decodeBase64 = (str) => {
+                    // Replace characters for URL-safe base64
+                    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                    // Add padding if needed
+                    const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+                    
+                    // Decode and convert to string
+                    return JSON.parse(atob(base64 + padding));
+                };
+                
+                const header = decodeBase64(headerB64);
+                const payload = decodeBase64(payloadB64);
+                
+                headerOutput.textContent = JSON.stringify(header, null, 2);
+                payloadOutput.textContent = JSON.stringify(payload, null, 2);
+                
+                // Check for expiration
+                if (payload.exp) {
+                    const expDate = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    
+                    if (expDate < now) {
+                        errorOutput.textContent = `Note: This token expired on ${expDate.toLocaleString()}`;
+                        errorOutput.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                errorOutput.textContent = `Error: ${error.message}`;
+                errorOutput.style.display = 'block';
+            }
+        });
+        
+        // Base64 Encoder/Decoder
+        document.getElementById('encode-base64').addEventListener('click', () => {
+            const input = document.getElementById('base64-input').value;
+            const output = document.getElementById('base64-output');
+            const errorOutput = document.getElementById('base64-error');
+            
+            // Reset error
+            errorOutput.style.display = 'none';
+            
+            if (!input) {
+                errorOutput.textContent = 'Please enter text to encode.';
+                errorOutput.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const encoded = btoa(input);
+                output.textContent = encoded;
+            } catch (error) {
+                errorOutput.textContent = `Error encoding to Base64: ${error.message}`;
+                errorOutput.style.display = 'block';
+            }
+        });
+        
+        document.getElementById('decode-base64').addEventListener('click', () => {
+            const input = document.getElementById('base64-input').value.trim();
+            const output = document.getElementById('base64-output');
+            const errorOutput = document.getElementById('base64-error');
+            
+            // Reset error
+            errorOutput.style.display = 'none';
+            
+            if (!input) {
+                errorOutput.textContent = 'Please enter base64 to decode.';
+                errorOutput.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const decoded = atob(input);
+                output.textContent = decoded;
+            } catch (error) {
+                errorOutput.textContent = `Error decoding from Base64: ${error.message}. Make sure the input is valid Base64.`;
+                errorOutput.style.display = 'block';
+            }
+        });
+
+        // Set default date/time value for time-since calculator
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('time-since-input').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    </script>
+</body>
+</html>
