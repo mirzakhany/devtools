@@ -82,6 +82,30 @@
                     <i class="bi bi-code-square tool-icon"></i>Base64 Encoder/Decoder
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" 
+                        type="button" role="tab" aria-controls="url" aria-selected="false">
+                    <i class="bi bi-link tool-icon"></i>URL Encoder/Decoder
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="html-entity-tab" data-bs-toggle="tab" data-bs-target="#html-entity" 
+                        type="button" role="tab" aria-controls="html-entity" aria-selected="false">
+                    <i class="bi bi-code-slash tool-icon"></i>HTML Entity Encoder/Decoder
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="hash-tab" data-bs-toggle="tab" data-bs-target="#hash" 
+                        type="button" role="tab" aria-controls="hash" aria-selected="false">
+                    <i class="bi bi-hash tool-icon"></i>Hash Generator
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="uuid-tab" data-bs-toggle="tab" data-bs-target="#uuid" 
+                        type="button" role="tab" aria-controls="uuid" aria-selected="false">
+                    <i class="bi bi-fingerprint tool-icon"></i>UUID Generator
+                </button>
+            </li>
         </ul>
         
         <div class="tab-content" id="toolsTabContent">
@@ -156,6 +180,122 @@
                     <div class="alert alert-danger mt-3 d-none" id="base64-error"></div>
                 </div>
             </div>
+            
+            <!-- URL Encoder/Decoder -->
+            <div class="tab-pane fade" id="url" role="tabpanel" aria-labelledby="url-tab">
+                <div class="tool-container">
+                    <h2 class="mb-4"><i class="bi bi-link-45deg text-primary me-2"></i>URL Encoder/Decoder</h2>
+                    <div class="mb-3">
+                        <label for="url-input" class="form-label">Input:</label>
+                        <textarea class="form-control font-monospace" id="url-input" rows="5" placeholder="Enter text to encode or URL encoded string to decode..."></textarea>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" id="encode-url">Encode URL</button>
+                            <button class="btn btn-secondary" id="decode-url">Decode URL</button>
+                        </div>
+                    </div>
+                    <h5 class="text-secondary mb-2 mt-4">Output:</h5>
+                    <div class="output d-none" id="url-output"></div>
+                    <div class="alert alert-danger mt-3 d-none" id="url-error"></div>
+                </div>
+            </div>
+            
+            <!-- HTML Entity Encoder/Decoder -->
+            <div class="tab-pane fade" id="html-entity" role="tabpanel" aria-labelledby="html-entity-tab">
+                <div class="tool-container">
+                    <h2 class="mb-4"><i class="bi bi-code-slash text-primary me-2"></i>HTML Entity Encoder/Decoder</h2>
+                    <div class="mb-3">
+                        <label for="html-entity-input" class="form-label">Input:</label>
+                        <textarea class="form-control font-monospace" id="html-entity-input" rows="5" placeholder="Enter text with HTML entities or text to encode..."></textarea>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" id="encode-html-entity">Encode HTML Entities</button>
+                            <button class="btn btn-secondary" id="decode-html-entity">Decode HTML Entities</button>
+                        </div>
+                    </div>
+                    <h5 class="text-secondary mb-2 mt-4">Output:</h5>
+                    <div class="output d-none" id="html-entity-output"></div>
+                    <div class="alert alert-danger mt-3 d-none" id="html-entity-error"></div>
+                </div>
+            </div>
+            
+            <!-- Hash Generator -->
+            <div class="tab-pane fade" id="hash" role="tabpanel" aria-labelledby="hash-tab">
+                <div class="tool-container">
+                    <h2 class="mb-4"><i class="bi bi-hash text-primary me-2"></i>Hash Generator</h2>
+                    <div class="mb-3">
+                        <label for="hash-input" class="form-label">Input Text:</label>
+                        <textarea class="form-control font-monospace" id="hash-input" rows="5" placeholder="Enter text to hash..."></textarea>
+                        <div class="mt-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashType" id="md5" value="MD5" checked>
+                                <label class="form-check-label" for="md5">MD5</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashType" id="sha1" value="SHA-1">
+                                <label class="form-check-label" for="sha1">SHA-1</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashType" id="sha256" value="SHA-256">
+                                <label class="form-check-label" for="sha256">SHA-256</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashType" id="sha512" value="SHA-512">
+                                <label class="form-check-label" for="sha512">SHA-512</label>
+                            </div>
+                            <button class="btn btn-primary mt-3" id="generate-hash">Generate Hash</button>
+                        </div>
+                    </div>
+                    <h5 class="text-secondary mb-2 mt-4">Hash Output:</h5>
+                    <div class="output d-none" id="hash-output"></div>
+                    <div class="alert alert-danger mt-3 d-none" id="hash-error"></div>
+                </div>
+            </div>
+            
+            <!-- UUID Generator -->
+            <div class="tab-pane fade" id="uuid" role="tabpanel" aria-labelledby="uuid-tab">
+                <div class="tool-container">
+                    <h2 class="mb-4"><i class="bi bi-fingerprint text-primary me-2"></i>UUID Generator</h2>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">UUID Version:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="uuidVersion" id="uuidv4" value="v4" checked>
+                                    <label class="form-check-label" for="uuidv4">
+                                        UUID v4 (Random)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="uuidVersion" id="uuidv1" value="v1">
+                                    <label class="form-check-label" for="uuidv1">
+                                        UUID v1 (Time-based)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Options:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="upperCase">
+                                    <label class="form-check-label" for="upperCase">
+                                        Uppercase
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="noDashes">
+                                    <label class="form-check-label" for="noDashes">
+                                        No Dashes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" id="generate-uuid">Generate UUID</button>
+                            <button class="btn btn-outline-secondary ms-2" id="generate-multiple-uuid">Generate 10 UUIDs</button>
+                        </div>
+                    </div>
+                    <h5 class="text-secondary mb-2 mt-4">Generated UUID(s):</h5>
+                    <div class="output d-none" id="uuid-output"></div>
+                </div>
+            </div>
         </div>
         
         <footer class="text-center mt-5 text-muted">
@@ -165,239 +305,6 @@
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Timestamp Converter
-        document.getElementById('convert-timestamp').addEventListener('click', () => {
-            const timestamp = document.getElementById('timestamp-input').value;
-            const output = document.getElementById('timestamp-output');
-            
-            if (!timestamp) {
-                output.textContent = 'Please enter a timestamp.';
-                output.classList.remove('d-none');
-                return;
-            }
-            
-            try {
-                const date = new Date(parseInt(timestamp) * 1000);
-                if (isNaN(date.getTime())) {
-                    throw new Error('Invalid timestamp');
-                }
-                
-                output.innerHTML = `
-<strong>UTC Time:</strong> ${date.toUTCString()}
-<strong>Local Time:</strong> ${date.toString()}
-<strong>ISO Format:</strong> ${date.toISOString()}
-                `;
-                output.classList.remove('d-none');
-            } catch (error) {
-                output.textContent = `Error: ${error.message}`;
-                output.classList.remove('d-none');
-            }
-        });
-        
-        document.getElementById('current-timestamp').addEventListener('click', () => {
-            const now = Math.floor(Date.now() / 1000);
-            document.getElementById('timestamp-input').value = now;
-            document.getElementById('convert-timestamp').click();
-        });
-        
-        // Time Since Calculator
-        document.getElementById('calculate-time-since').addEventListener('click', () => {
-            const inputDate = document.getElementById('time-since-input').value;
-            const output = document.getElementById('time-since-output');
-            
-            if (!inputDate) {
-                output.textContent = 'Please select a date and time.';
-                output.classList.remove('d-none');
-                return;
-            }
-            
-            try {
-                const selectedDate = new Date(inputDate);
-                const now = new Date();
-                
-                const diffMs = now - selectedDate;
-                
-                if (diffMs < 0) {
-                    output.textContent = 'The selected date is in the future.';
-                    output.classList.remove('d-none');
-                    return;
-                }
-                
-                // Calculate differences
-                const seconds = Math.floor(diffMs / 1000);
-                const minutes = Math.floor(seconds / 60);
-                const hours = Math.floor(minutes / 60);
-                const days = Math.floor(hours / 24);
-                
-                // Calculate months and years more accurately
-                let years = now.getFullYear() - selectedDate.getFullYear();
-                let months = now.getMonth() - selectedDate.getMonth();
-                
-                // Adjust for day of month
-                if (now.getDate() < selectedDate.getDate()) {
-                    months--;
-                }
-                
-                // Handle negative months
-                if (months < 0) {
-                    years--;
-                    months += 12;
-                }
-                
-                // Calculate remaining time
-                const remainingDays = days - (years * 365 + months * 30); // Approximation
-                const remainingHours = hours % 24;
-                const remainingMinutes = minutes % 60;
-                const remainingSeconds = seconds % 60;
-                
-                output.innerHTML = `
-<div class="row">
-    <div class="col-md-6">
-        <h6 class="text-secondary">Elapsed Time</h6>
-        <p>
-            ${years} years, ${months} months, ${remainingDays} days<br>
-            ${days} total days<br>
-            ${hours} total hours<br>
-            ${minutes} total minutes<br>
-            ${seconds} total seconds
-        </p>
-    </div>
-    <div class="col-md-6">
-        <h6 class="text-secondary">Precise Time</h6>
-        <p>${years} years, ${months} months, ${remainingDays} days, ${remainingHours} hours, ${remainingMinutes} minutes, ${remainingSeconds} seconds</p>
-    </div>
-</div>
-                `;
-                output.classList.remove('d-none');
-            } catch (error) {
-                output.textContent = `Error: ${error.message}`;
-                output.classList.remove('d-none');
-            }
-        });
-        
-        // JWT Decoder
-        document.getElementById('decode-jwt').addEventListener('click', () => {
-            const jwtToken = document.getElementById('jwt-input').value.trim();
-            const headerOutput = document.getElementById('jwt-header-output');
-            const payloadOutput = document.getElementById('jwt-payload-output');
-            const errorOutput = document.getElementById('jwt-error');
-            
-            // Reset outputs
-            headerOutput.textContent = '';
-            headerOutput.classList.add('d-none');
-            payloadOutput.textContent = '';
-            payloadOutput.classList.add('d-none');
-            errorOutput.classList.add('d-none');
-            
-            if (!jwtToken) {
-                errorOutput.textContent = 'Please enter a JWT token.';
-                errorOutput.classList.remove('d-none');
-                return;
-            }
-            
-            try {
-                const parts = jwtToken.split('.');
-                if (parts.length !== 3) {
-                    throw new Error('Invalid JWT format. Expected 3 parts separated by dots.');
-                }
-                
-                const headerB64 = parts[0];
-                const payloadB64 = parts[1];
-                
-                const decodeBase64 = (str) => {
-                    // Replace characters for URL-safe base64
-                    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-                    // Add padding if needed
-                    const padding = '='.repeat((4 - (base64.length % 4)) % 4);
-                    
-                    // Decode and convert to string
-                    return JSON.parse(atob(base64 + padding));
-                };
-                
-                const header = decodeBase64(headerB64);
-                const payload = decodeBase64(payloadB64);
-                
-                headerOutput.textContent = JSON.stringify(header, null, 2);
-                headerOutput.classList.remove('d-none');
-                payloadOutput.textContent = JSON.stringify(payload, null, 2);
-                payloadOutput.classList.remove('d-none');
-                
-                // Check for expiration
-                if (payload.exp) {
-                    const expDate = new Date(payload.exp * 1000);
-                    const now = new Date();
-                    
-                    if (expDate < now) {
-                        errorOutput.textContent = `Note: This token expired on ${expDate.toLocaleString()}`;
-                        errorOutput.classList.remove('d-none');
-                    }
-                }
-            } catch (error) {
-                errorOutput.textContent = `Error: ${error.message}`;
-                errorOutput.classList.remove('d-none');
-            }
-        });
-        
-        // Base64 Encoder/Decoder
-        document.getElementById('encode-base64').addEventListener('click', () => {
-            const input = document.getElementById('base64-input').value;
-            const output = document.getElementById('base64-output');
-            const errorOutput = document.getElementById('base64-error');
-            
-            // Reset error
-            errorOutput.classList.add('d-none');
-            
-            if (!input) {
-                errorOutput.textContent = 'Please enter text to encode.';
-                errorOutput.classList.remove('d-none');
-                return;
-            }
-            
-            try {
-                const encoded = btoa(input);
-                output.textContent = encoded;
-                output.classList.remove('d-none');
-            } catch (error) {
-                errorOutput.textContent = `Error encoding to Base64: ${error.message}`;
-                errorOutput.classList.remove('d-none');
-            }
-        });
-        
-        document.getElementById('decode-base64').addEventListener('click', () => {
-            const input = document.getElementById('base64-input').value.trim();
-            const output = document.getElementById('base64-output');
-            const errorOutput = document.getElementById('base64-error');
-            
-            // Reset error
-            errorOutput.classList.add('d-none');
-            
-            if (!input) {
-                errorOutput.textContent = 'Please enter base64 to decode.';
-                errorOutput.classList.remove('d-none');
-                return;
-            }
-            
-            try {
-                const decoded = atob(input);
-                output.textContent = decoded;
-                output.classList.remove('d-none');
-            } catch (error) {
-                errorOutput.textContent = `Error decoding from Base64: ${error.message}. Make sure the input is valid Base64.`;
-                errorOutput.classList.remove('d-none');
-            }
-        });
-
-        // Set default date/time value for time-since calculator
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        
-        document.getElementById('time-since-input').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    </script>
+    <script src="./script.js"></script>
 </body>
 </html>
