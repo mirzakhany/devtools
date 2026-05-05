@@ -4,307 +4,789 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Utility Tools</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <style>
+        :root {
+            --sidebar-width: 240px;
+            --sidebar-collapsed: 0px;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #334155;
+            --sidebar-active-bg: #0d6efd;
+            --sidebar-active-text: #fff;
+            --sidebar-category: #64748b;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            background-color: #f8f9fa;
-            padding-top: 20px;
-            padding-bottom: 40px;
+            background-color: #f1f5f9;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-        
-        .tool-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
-            padding: 25px;
-            margin-bottom: 30px;
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
         }
-        
-        .output {
-            background-color: #f8f9fa;
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 1040;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 20px 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .sidebar-brand i { font-size: 1.4rem; color: #60a5fa; }
+
+        .sidebar-category {
+            padding: 16px 16px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--sidebar-category);
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.875rem;
             border-radius: 6px;
-            padding: 15px;
-            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            margin: 1px 8px;
+            transition: background 0.15s, color 0.15s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .sidebar-link:hover { background: var(--sidebar-hover); color: #e2e8f0; }
+        .sidebar-link.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); }
+        .sidebar-link i { font-size: 1.1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid #334155;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .sidebar-footer a { color: #60a5fa; text-decoration: none; }
+        .sidebar-footer a:hover { text-decoration: underline; }
+
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 24px 32px 40px;
+            min-width: 0;
+        }
+
+        /* Mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1035;
+        }
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: var(--sidebar-bg);
+            color: #fff;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-header button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.4rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .mobile-header span { font-weight: 600; }
+
+        @media (max-width: 991.98px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .mobile-header { display: flex; }
+            .main-content { margin-left: 0; padding: 16px; }
+        }
+
+        /* Tool containers */
+        .tool-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .tool-pane { display: none; }
+        .tool-pane.active { display: block; }
+
+        .tool-pane h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-pane h2 i { color: #0d6efd; }
+
+        /* Output areas */
+        .output-wrap {
+            position: relative;
+            margin-top: 8px;
+        }
+
+        .output {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
             white-space: pre-wrap;
             word-break: break-all;
             border-left: 4px solid #0d6efd;
+            min-height: 40px;
         }
-        
-        .nav-link {
-            color: #495057;
-            font-weight: 500;
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
+            z-index: 2;
         }
-        
-        .nav-link.active {
-            color: #0d6efd !important;
-            border-bottom-color: #0d6efd !important;
+
+        .copy-btn:hover { background: #cbd5e1; }
+        .copy-btn.copied { background: #bbf7d0; color: #166534; }
+
+        /* Status badges */
+        .badge-valid { background: #dcfce7; color: #166534; }
+        .badge-expired { background: #fee2e2; color: #991b1b; }
+
+        /* JWT annotations */
+        .jwt-annotation {
+            color: #64748b;
+            font-style: italic;
         }
-        
-        .main-title {
-            margin-bottom: 30px;
-            color: #212529;
+
+        /* Color preview */
+        .color-swatch {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            display: inline-block;
         }
-        
-        .tool-icon {
-            margin-right: 8px;
+
+        .color-large-swatch {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 12px;
         }
+
+        /* Diff highlighting */
+        .diff-added { background: #dcfce7; }
+        .diff-removed { background: #fee2e2; text-decoration: line-through; }
+
+        /* Regex match highlighting */
+        .regex-match { background: #fef08a; padding: 1px 0; border-radius: 2px; }
+        .regex-group { border-bottom: 2px solid #f97316; }
+
+        /* Live timestamp ticker */
+        .live-ticker {
+            font-family: 'SF Mono', monospace;
+            font-size: 1.1rem;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+        /* File drop zone */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            color: #94a3b8;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+
+        .drop-zone.dragover { border-color: #0d6efd; background: #eff6ff; }
+
+        .char-count { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+
+        /* Highlight.js overrides to match output style */
+        .output pre { margin: 0; background: transparent; }
+        .output code.hljs { background: transparent; padding: 0; font-size: 0.875rem; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center main-title">Developer Utility Tools</h1>
-        
-        <ul class="nav nav-tabs mb-4" id="toolsTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="timestamp-tab" data-bs-toggle="tab" data-bs-target="#timestamp" 
-                        type="button" role="tab" aria-controls="timestamp" aria-selected="true">
-                    <i class="bi bi-clock tool-icon"></i>Timestamp Converter
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="time-since-tab" data-bs-toggle="tab" data-bs-target="#time-since" 
-                        type="button" role="tab" aria-controls="time-since" aria-selected="false">
-                    <i class="bi bi-calendar-check tool-icon"></i>Time Since Calculator
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="jwt-tab" data-bs-toggle="tab" data-bs-target="#jwt" 
-                        type="button" role="tab" aria-controls="jwt" aria-selected="false">
-                    <i class="bi bi-key tool-icon"></i>JWT Decoder
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="base64-tab" data-bs-toggle="tab" data-bs-target="#base64" 
-                        type="button" role="tab" aria-controls="base64" aria-selected="false">
-                    <i class="bi bi-code-square tool-icon"></i>Base64 Encoder/Decoder
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url" 
-                        type="button" role="tab" aria-controls="url" aria-selected="false">
-                    <i class="bi bi-link tool-icon"></i>URL Encoder/Decoder
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="html-entity-tab" data-bs-toggle="tab" data-bs-target="#html-entity" 
-                        type="button" role="tab" aria-controls="html-entity" aria-selected="false">
-                    <i class="bi bi-code-slash tool-icon"></i>HTML Entity Encoder/Decoder
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="hash-tab" data-bs-toggle="tab" data-bs-target="#hash" 
-                        type="button" role="tab" aria-controls="hash" aria-selected="false">
-                    <i class="bi bi-hash tool-icon"></i>Hash Generator
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="uuid-tab" data-bs-toggle="tab" data-bs-target="#uuid" 
-                        type="button" role="tab" aria-controls="uuid" aria-selected="false">
-                    <i class="bi bi-fingerprint tool-icon"></i>UUID Generator
-                </button>
-            </li>
-        </ul>
-        
-        <div class="tab-content" id="toolsTabContent">
+    <!-- Mobile header -->
+    <div class="mobile-header">
+        <button id="sidebar-toggle" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
+        <span>Dev Tools</span>
+    </div>
+
+    <div class="app-layout">
+        <!-- Sidebar overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="bi bi-tools"></i> Dev Tools
+            </div>
+
+            <div class="sidebar-category">Time</div>
+            <a class="sidebar-link active" data-tool="timestamp" href="#timestamp">
+                <i class="bi bi-clock"></i> Timestamp Converter
+            </a>
+            <a class="sidebar-link" data-tool="time-since" href="#time-since">
+                <i class="bi bi-calendar-check"></i> Time Since
+            </a>
+
+            <div class="sidebar-category">Encoding / Decoding</div>
+            <a class="sidebar-link" data-tool="base64" href="#base64">
+                <i class="bi bi-code-square"></i> Base64
+            </a>
+            <a class="sidebar-link" data-tool="url" href="#url">
+                <i class="bi bi-link"></i> URL Encode/Decode
+            </a>
+            <a class="sidebar-link" data-tool="html-entity" href="#html-entity">
+                <i class="bi bi-code-slash"></i> HTML Entities
+            </a>
+
+            <div class="sidebar-category">Security / Crypto</div>
+            <a class="sidebar-link" data-tool="jwt" href="#jwt">
+                <i class="bi bi-key"></i> JWT Decoder
+            </a>
+            <a class="sidebar-link" data-tool="hash" href="#hash">
+                <i class="bi bi-hash"></i> Hash Generator
+            </a>
+
+            <div class="sidebar-category">Generators</div>
+            <a class="sidebar-link" data-tool="uuid" href="#uuid">
+                <i class="bi bi-fingerprint"></i> UUID Generator
+            </a>
+            <a class="sidebar-link" data-tool="lorem" href="#lorem">
+                <i class="bi bi-text-paragraph"></i> Lorem Ipsum
+            </a>
+
+            <div class="sidebar-category">Text / Data</div>
+            <a class="sidebar-link" data-tool="json" href="#json">
+                <i class="bi bi-braces"></i> JSON Formatter
+            </a>
+            <a class="sidebar-link" data-tool="regex" href="#regex">
+                <i class="bi bi-search"></i> Regex Tester
+            </a>
+            <a class="sidebar-link" data-tool="diff" href="#diff">
+                <i class="bi bi-file-diff"></i> Text Diff
+            </a>
+            <a class="sidebar-link" data-tool="color" href="#color">
+                <i class="bi bi-palette"></i> Color Converter
+            </a>
+            <a class="sidebar-link" data-tool="number-base" href="#number-base">
+                <i class="bi bi-123"></i> Number Base
+            </a>
+
+            <div class="sidebar-footer">
+                <a href="https://github.com/mirzakhany/devtools" target="_blank"><i class="bi bi-github"></i> GitHub</a>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="main-content">
+
             <!-- Timestamp Converter -->
-            <div class="tab-pane fade show active" id="timestamp" role="tabpanel" aria-labelledby="timestamp-tab">
+            <div class="tool-pane active" id="tool-timestamp">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-clock-history text-primary me-2"></i>Timestamp Converter</h2>
-                    <div class="mb-3">
-                        <label for="timestamp-input" class="form-label">Unix Timestamp (in seconds):</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" id="timestamp-input" placeholder="Enter timestamp (e.g., 1617235200)">
-                            <button class="btn btn-primary" id="convert-timestamp">Convert</button>
-                            <button class="btn btn-outline-secondary" id="current-timestamp">Use Current Time</button>
+                    <h2><i class="bi bi-clock-history"></i> Timestamp Converter</h2>
+                    <div class="mb-3 d-flex align-items-center gap-3 flex-wrap">
+                        <span class="text-muted">Current:</span>
+                        <span class="live-ticker" id="live-timestamp"></span>
+                        <span class="text-muted" id="live-timestamp-ms"></span>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-6">
+                            <label class="form-label fw-semibold">Unix Timestamp</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control font-monospace" id="timestamp-input" placeholder="e.g. 1617235200 or 1617235200000">
+                                <button class="btn btn-primary" id="convert-timestamp">Convert</button>
+                                <button class="btn btn-outline-secondary" id="current-timestamp">Now</button>
+                            </div>
+                            <div class="char-count" id="timestamp-detect"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label fw-semibold">Date/Time to Timestamp</label>
+                            <div class="input-group">
+                                <input type="datetime-local" class="form-control" id="timestamp-reverse-input">
+                                <button class="btn btn-primary" id="reverse-timestamp">Convert</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="output d-none" id="timestamp-output"></div>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="timestamp-output"></div>
+                        <button class="copy-btn d-none" id="timestamp-copy"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Time Since Calculator -->
-            <div class="tab-pane fade" id="time-since" role="tabpanel" aria-labelledby="time-since-tab">
+            <div class="tool-pane" id="tool-time-since">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-hourglass-split text-primary me-2"></i>Time Since Calculator</h2>
+                    <h2><i class="bi bi-hourglass-split"></i> Time Since / Until</h2>
                     <div class="mb-3">
-                        <label for="time-since-input" class="form-label">Select a Date and Time:</label>
-                        <div class="input-group mb-3">
+                        <label for="time-since-input" class="form-label fw-semibold">Select a Date and Time:</label>
+                        <div class="input-group">
                             <input type="datetime-local" class="form-control" id="time-since-input">
                             <button class="btn btn-primary" id="calculate-time-since">Calculate</button>
                         </div>
                     </div>
-                    <div class="output d-none" id="time-since-output"></div>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="time-since-output"></div>
+                        <button class="copy-btn d-none" id="time-since-copy"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- JWT Decoder -->
-            <div class="tab-pane fade" id="jwt" role="tabpanel" aria-labelledby="jwt-tab">
+            <div class="tool-pane" id="tool-jwt">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-shield-lock text-primary me-2"></i>JWT Decoder</h2>
+                    <h2><i class="bi bi-shield-lock"></i> JWT Decoder</h2>
                     <div class="mb-3">
-                        <label for="jwt-input" class="form-label">JWT Token:</label>
-                        <textarea class="form-control font-monospace" id="jwt-input" rows="4" placeholder="Enter JWT token..."></textarea>
+                        <label for="jwt-input" class="form-label fw-semibold">JWT Token:</label>
+                        <textarea class="form-control font-monospace" id="jwt-input" rows="4" placeholder="Paste a JWT token..."></textarea>
                         <button class="btn btn-primary mt-3" id="decode-jwt">Decode</button>
                     </div>
-                    <div class="row mt-4">
+                    <div id="jwt-status" class="mb-3 d-none"></div>
+                    <div class="mb-3">
+                        <h5 class="text-secondary mb-2">Payload</h5>
+                        <div class="output-wrap">
+                            <div class="output d-none" id="jwt-payload-output" style="max-height:400px;overflow:auto"></div>
+                            <button class="copy-btn d-none" data-copy-target="jwt-payload-output"><i class="bi bi-clipboard"></i> Copy</button>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
                         <div class="col-md-6 mb-3">
                             <h5 class="text-secondary mb-2">Header</h5>
-                            <div class="output d-none" id="jwt-header-output"></div>
+                            <div class="output-wrap">
+                                <div class="output d-none" id="jwt-header-output"></div>
+                                <button class="copy-btn d-none" data-copy-target="jwt-header-output"><i class="bi bi-clipboard"></i> Copy</button>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <h5 class="text-secondary mb-2">Payload</h5>
-                            <div class="output d-none" id="jwt-payload-output"></div>
+                        <div class="col-md-6 mb-3">
+                            <h5 class="text-secondary mb-2">Signature</h5>
+                            <div class="output-wrap">
+                                <div class="output d-none" id="jwt-signature-output" style="word-break:break-all"></div>
+                                <button class="copy-btn d-none" data-copy-target="jwt-signature-output"><i class="bi bi-clipboard"></i> Copy</button>
+                            </div>
+                            <small class="text-muted">Displayed as-is. Verification is not performed.</small>
                         </div>
                     </div>
                     <div class="alert alert-danger mt-3 d-none" id="jwt-error"></div>
                 </div>
             </div>
-            
+
             <!-- Base64 Encoder/Decoder -->
-            <div class="tab-pane fade" id="base64" role="tabpanel" aria-labelledby="base64-tab">
+            <div class="tool-pane" id="tool-base64">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-braces text-primary me-2"></i>Base64 Encoder/Decoder</h2>
+                    <h2><i class="bi bi-braces"></i> Base64 Encoder / Decoder</h2>
                     <div class="mb-3">
-                        <label for="base64-input" class="form-label">Input:</label>
+                        <label for="base64-input" class="form-label fw-semibold">Input:</label>
                         <textarea class="form-control font-monospace" id="base64-input" rows="5" placeholder="Enter text to encode or base64 to decode..."></textarea>
-                        <div class="mt-3">
-                            <button class="btn btn-primary me-2" id="encode-base64">Encode to Base64</button>
-                            <button class="btn btn-secondary" id="decode-base64">Decode from Base64</button>
+                        <div class="char-count" id="base64-input-count"></div>
+                        <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+                            <button class="btn btn-primary" id="encode-base64">Encode</button>
+                            <button class="btn btn-secondary" id="decode-base64">Decode</button>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="base64-urlsafe">
+                                <label class="form-check-label" for="base64-urlsafe">URL-safe</label>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="text-secondary mb-2 mt-4">Output:</h5>
-                    <div class="output d-none" id="base64-output"></div>
+                    <h6 class="text-secondary mb-2 mt-4">Output:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="base64-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="base64-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                    <div class="char-count" id="base64-output-count"></div>
                     <div class="alert alert-danger mt-3 d-none" id="base64-error"></div>
                 </div>
             </div>
-            
+
             <!-- URL Encoder/Decoder -->
-            <div class="tab-pane fade" id="url" role="tabpanel" aria-labelledby="url-tab">
+            <div class="tool-pane" id="tool-url">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-link-45deg text-primary me-2"></i>URL Encoder/Decoder</h2>
+                    <h2><i class="bi bi-link-45deg"></i> URL Encoder / Decoder</h2>
                     <div class="mb-3">
-                        <label for="url-input" class="form-label">Input:</label>
-                        <textarea class="form-control font-monospace" id="url-input" rows="5" placeholder="Enter text to encode or URL encoded string to decode..."></textarea>
-                        <div class="mt-3">
-                            <button class="btn btn-primary me-2" id="encode-url">Encode URL</button>
-                            <button class="btn btn-secondary" id="decode-url">Decode URL</button>
+                        <label for="url-input" class="form-label fw-semibold">Input:</label>
+                        <textarea class="form-control font-monospace" id="url-input" rows="4" placeholder="Enter text or a full URL..."></textarea>
+                        <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+                            <button class="btn btn-primary" id="encode-url">Encode</button>
+                            <button class="btn btn-secondary" id="decode-url">Decode</button>
+                            <button class="btn btn-outline-info" id="parse-url">Parse URL</button>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="urlMode" id="url-mode-component" value="component" checked>
+                                <label class="form-check-label" for="url-mode-component">encodeURIComponent</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="urlMode" id="url-mode-uri" value="uri">
+                                <label class="form-check-label" for="url-mode-uri">encodeURI</label>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="text-secondary mb-2 mt-4">Output:</h5>
-                    <div class="output d-none" id="url-output"></div>
+                    <h6 class="text-secondary mb-2 mt-4">Output:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="url-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="url-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
                     <div class="alert alert-danger mt-3 d-none" id="url-error"></div>
                 </div>
             </div>
-            
+
             <!-- HTML Entity Encoder/Decoder -->
-            <div class="tab-pane fade" id="html-entity" role="tabpanel" aria-labelledby="html-entity-tab">
+            <div class="tool-pane" id="tool-html-entity">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-code-slash text-primary me-2"></i>HTML Entity Encoder/Decoder</h2>
+                    <h2><i class="bi bi-code-slash"></i> HTML Entity Encoder / Decoder</h2>
                     <div class="mb-3">
-                        <label for="html-entity-input" class="form-label">Input:</label>
+                        <label for="html-entity-input" class="form-label fw-semibold">Input:</label>
                         <textarea class="form-control font-monospace" id="html-entity-input" rows="5" placeholder="Enter text with HTML entities or text to encode..."></textarea>
+                        <div class="char-count" id="html-entity-input-count"></div>
                         <div class="mt-3">
-                            <button class="btn btn-primary me-2" id="encode-html-entity">Encode HTML Entities</button>
-                            <button class="btn btn-secondary" id="decode-html-entity">Decode HTML Entities</button>
+                            <button class="btn btn-primary me-2" id="encode-html-entity">Encode</button>
+                            <button class="btn btn-secondary" id="decode-html-entity">Decode</button>
                         </div>
                     </div>
-                    <h5 class="text-secondary mb-2 mt-4">Output:</h5>
-                    <div class="output d-none" id="html-entity-output"></div>
+                    <h6 class="text-secondary mb-2 mt-4">Output:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="html-entity-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="html-entity-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                    <div class="char-count" id="html-entity-output-count"></div>
                     <div class="alert alert-danger mt-3 d-none" id="html-entity-error"></div>
                 </div>
             </div>
-            
+
             <!-- Hash Generator -->
-            <div class="tab-pane fade" id="hash" role="tabpanel" aria-labelledby="hash-tab">
+            <div class="tool-pane" id="tool-hash">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-hash text-primary me-2"></i>Hash Generator</h2>
+                    <h2><i class="bi bi-hash"></i> Hash Generator</h2>
                     <div class="mb-3">
-                        <label for="hash-input" class="form-label">Input Text:</label>
-                        <textarea class="form-control font-monospace" id="hash-input" rows="5" placeholder="Enter text to hash..."></textarea>
-                        <div class="mt-3">
+                        <label for="hash-input" class="form-label fw-semibold">Input Text:</label>
+                        <textarea class="form-control font-monospace" id="hash-input" rows="4" placeholder="Enter text to hash..."></textarea>
+                        <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="hashType" id="md5" value="MD5" checked>
-                                <label class="form-check-label" for="md5">MD5</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="hashType" id="sha1" value="SHA-1">
-                                <label class="form-check-label" for="sha1">SHA-1</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="hashType" id="sha256" value="SHA-256">
+                                <input class="form-check-input" type="radio" name="hashType" id="sha256" value="SHA-256" checked>
                                 <label class="form-check-label" for="sha256">SHA-256</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="hashType" id="sha512" value="SHA-512">
                                 <label class="form-check-label" for="sha512">SHA-512</label>
                             </div>
-                            <button class="btn btn-primary mt-3" id="generate-hash">Generate Hash</button>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashType" id="sha1" value="SHA-1">
+                                <label class="form-check-label" for="sha1">SHA-1</label>
+                            </div>
+                            <span class="text-muted">|</span>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashOutput" id="hash-hex" value="hex" checked>
+                                <label class="form-check-label" for="hash-hex">Hex</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="hashOutput" id="hash-b64" value="base64">
+                                <label class="form-check-label" for="hash-b64">Base64</label>
+                            </div>
+                            <button class="btn btn-primary" id="generate-hash">Generate Hash</button>
                         </div>
                     </div>
-                    <h5 class="text-secondary mb-2 mt-4">Hash Output:</h5>
-                    <div class="output d-none" id="hash-output"></div>
+                    <div class="drop-zone mb-3" id="hash-drop-zone">
+                        <i class="bi bi-cloud-arrow-up fs-4"></i><br>
+                        Drop a file here or <label for="hash-file-input" class="text-primary" style="cursor:pointer">browse</label>
+                        <input type="file" id="hash-file-input" class="d-none">
+                        <div class="mt-1 small" id="hash-file-name"></div>
+                    </div>
+                    <h6 class="text-secondary mb-2">Hash Output:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="hash-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="hash-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
                     <div class="alert alert-danger mt-3 d-none" id="hash-error"></div>
                 </div>
             </div>
-            
+
             <!-- UUID Generator -->
-            <div class="tab-pane fade" id="uuid" role="tabpanel" aria-labelledby="uuid-tab">
+            <div class="tool-pane" id="tool-uuid">
                 <div class="tool-container">
-                    <h2 class="mb-4"><i class="bi bi-fingerprint text-primary me-2"></i>UUID Generator</h2>
+                    <h2><i class="bi bi-fingerprint"></i> UUID Generator</h2>
                     <div class="mb-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">UUID Version:</label>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Version:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="uuidVersion" id="uuidv4" value="v4" checked>
-                                    <label class="form-check-label" for="uuidv4">
-                                        UUID v4 (Random)
-                                    </label>
+                                    <label class="form-check-label" for="uuidv4">UUID v4 (Random)</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="uuidVersion" id="uuidv1" value="v1">
-                                    <label class="form-check-label" for="uuidv1">
-                                        UUID v1 (Time-based)
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="uuidVersion" id="uuidv7" value="v7">
+                                    <label class="form-check-label" for="uuidv7">UUID v7 (Time-ordered)</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Options:</label>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Options:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="upperCase">
-                                    <label class="form-check-label" for="upperCase">
-                                        Uppercase
-                                    </label>
+                                    <label class="form-check-label" for="upperCase">Uppercase</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="noDashes">
-                                    <label class="form-check-label" for="noDashes">
-                                        No Dashes
-                                    </label>
+                                    <label class="form-check-label" for="noDashes">No Dashes</label>
                                 </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Count:</label>
+                                <input type="number" class="form-control" id="uuid-count" value="1" min="1" max="100" style="max-width:100px">
                             </div>
                         </div>
                         <div class="mt-3">
-                            <button class="btn btn-primary" id="generate-uuid">Generate UUID</button>
-                            <button class="btn btn-outline-secondary ms-2" id="generate-multiple-uuid">Generate 10 UUIDs</button>
+                            <button class="btn btn-primary" id="generate-uuid">Generate</button>
                         </div>
                     </div>
-                    <h5 class="text-secondary mb-2 mt-4">Generated UUID(s):</h5>
-                    <div class="output d-none" id="uuid-output"></div>
+                    <h6 class="text-secondary mb-2">Generated UUID(s):</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="uuid-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="uuid-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                    <hr>
+                    <h6 class="fw-semibold">UUID Validator</h6>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control font-monospace" id="uuid-validate-input" placeholder="Paste a UUID to validate...">
+                        <button class="btn btn-outline-primary" id="validate-uuid">Validate</button>
+                    </div>
+                    <div class="output d-none" id="uuid-validate-output"></div>
                 </div>
             </div>
-        </div>
-        
-        <footer class="text-center mt-5 text-muted">
-            <p>Developer Utility Tools | <a href="https://github.com/mirzakhany/devtools" target="_blank" class="text-decoration-none">GitHub Repository</a></p>
-        </footer>
+
+            <!-- Lorem Ipsum Generator -->
+            <div class="tool-pane" id="tool-lorem">
+                <div class="tool-container">
+                    <h2><i class="bi bi-text-paragraph"></i> Lorem Ipsum Generator</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-auto">
+                            <label class="form-label fw-semibold">Count:</label>
+                            <input type="number" class="form-control" id="lorem-count" value="3" min="1" max="50" style="max-width:100px">
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label fw-semibold">Type:</label>
+                            <select class="form-select" id="lorem-type">
+                                <option value="paragraphs">Paragraphs</option>
+                                <option value="sentences">Sentences</option>
+                                <option value="words">Words</option>
+                            </select>
+                        </div>
+                        <div class="col-auto d-flex align-items-end">
+                            <button class="btn btn-primary" id="generate-lorem">Generate</button>
+                        </div>
+                    </div>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="lorem-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="lorem-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON Formatter -->
+            <div class="tool-pane" id="tool-json">
+                <div class="tool-container">
+                    <h2><i class="bi bi-braces"></i> JSON Formatter / Validator</h2>
+                    <div class="mb-3">
+                        <label for="json-input" class="form-label fw-semibold">Input JSON:</label>
+                        <textarea class="form-control font-monospace" id="json-input" rows="8" placeholder='Paste JSON here...'></textarea>
+                        <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+                            <button class="btn btn-primary" id="format-json">Format</button>
+                            <button class="btn btn-secondary" id="minify-json">Minify</button>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jsonIndent" id="json-2" value="2" checked>
+                                <label class="form-check-label" for="json-2">2 spaces</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jsonIndent" id="json-4" value="4">
+                                <label class="form-check-label" for="json-4">4 spaces</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jsonIndent" id="json-tab" value="tab">
+                                <label class="form-check-label" for="json-tab">Tab</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="text-secondary mb-2 mt-4">Output:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="json-output" style="max-height:500px;overflow:auto"></div>
+                        <button class="copy-btn d-none" data-copy-target="json-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                    <div class="alert alert-danger mt-3 d-none" id="json-error"></div>
+                </div>
+            </div>
+
+            <!-- Regex Tester -->
+            <div class="tool-pane" id="tool-regex">
+                <div class="tool-container">
+                    <h2><i class="bi bi-search"></i> Regex Tester</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-8">
+                            <label class="form-label fw-semibold">Pattern:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">/</span>
+                                <input type="text" class="form-control font-monospace" id="regex-pattern" placeholder="e.g. (\w+)@(\w+)\.(\w+)">
+                                <span class="input-group-text">/</span>
+                                <input type="text" class="form-control font-monospace" id="regex-flags" value="g" style="max-width:80px" placeholder="flags">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" id="test-regex">Test</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="regex-test-string" class="form-label fw-semibold">Test String:</label>
+                        <textarea class="form-control font-monospace" id="regex-test-string" rows="4" placeholder="Enter test string..."></textarea>
+                    </div>
+                    <h6 class="text-secondary mb-2">Matches:</h6>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="regex-output"></div>
+                    </div>
+                    <h6 class="text-secondary mb-2 mt-3">Highlighted:</h6>
+                    <div class="output d-none" id="regex-highlighted" style="white-space:pre-wrap"></div>
+                </div>
+            </div>
+
+            <!-- Text Diff -->
+            <div class="tool-pane" id="tool-diff">
+                <div class="tool-container">
+                    <h2><i class="bi bi-file-diff"></i> Text Diff</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Original:</label>
+                            <textarea class="form-control font-monospace" id="diff-input-a" rows="8" placeholder="Paste original text..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Modified:</label>
+                            <textarea class="form-control font-monospace" id="diff-input-b" rows="8" placeholder="Paste modified text..."></textarea>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mb-3" id="compute-diff">Compare</button>
+                    <div class="output d-none" id="diff-output" style="white-space:pre-wrap"></div>
+                </div>
+            </div>
+
+            <!-- Color Converter -->
+            <div class="tool-pane" id="tool-color">
+                <div class="tool-container">
+                    <h2><i class="bi bi-palette"></i> Color Converter</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Input Color:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control font-monospace" id="color-input" placeholder="#3b82f6 or rgb(59,130,246) or hsl(217,91%,60%)">
+                                <input type="color" class="form-control form-control-color" id="color-picker" value="#3b82f6" title="Pick a color">
+                                <button class="btn btn-primary" id="convert-color">Convert</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-large-swatch d-none" id="color-swatch"></div>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="color-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="color-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number Base Converter -->
+            <div class="tool-pane" id="tool-number-base">
+                <div class="tool-container">
+                    <h2><i class="bi bi-123"></i> Number Base Converter</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Input:</label>
+                            <input type="text" class="form-control font-monospace" id="numbase-input" placeholder="Enter a number...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">From Base:</label>
+                            <select class="form-select" id="numbase-from">
+                                <option value="10" selected>Decimal (10)</option>
+                                <option value="2">Binary (2)</option>
+                                <option value="8">Octal (8)</option>
+                                <option value="16">Hexadecimal (16)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" id="convert-numbase">Convert</button>
+                        </div>
+                    </div>
+                    <div class="output-wrap">
+                        <div class="output d-none" id="numbase-output"></div>
+                        <button class="copy-btn d-none" data-copy-target="numbase-output"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="./script.js"></script>
 </body>
 </html>
